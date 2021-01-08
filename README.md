@@ -16,6 +16,8 @@ http://yann.lecun.com/exdb/mnist/
 
 
  # Todo
-  - MNIST parsing 
-  - Node class and actual net class
-  - Activation function and such
+
+  - Softmax derivative
+  - Backpropagation
+  - Testing the net
+  - Write everything open: what is actually happening in each step?
