@@ -1,6 +1,7 @@
 import numpy as np
 import struct
 import random
+from dnn import DeepNeuralNetwork
 
 
 # https://mlfromscratch.com/neural-network-tutorial/#/
@@ -23,6 +24,10 @@ with open("labels", "rb") as i:
     labs = np.fromfile(i, dtype=np.dtype(np.uint8)).newbyteorder(">")
 
 
+#Reduced size for testing
+size=10000
+imgs=imgs[50000:]
+labs=labs[50000:]
 print(imgs.shape)
 
 # To categorial: one-hot matrix:
@@ -31,13 +36,15 @@ for i in range(len(labs)):
     vl = labs[i]
     cats[i][vl] = 1
 
+print("categorials done")
+
 
 ##At this stage, imgs is 60000*784 pixel images between 0 and 1
 # cats is categorical one-hot encoded vectors
 
 # Get a set of unique random integers to decide train/test split
 rndintegers = random.sample(range(size), k=int(trainsize * size))
-print("tapa")
+# print("tapa")
 
 
 randindices = list(range(size))
@@ -52,4 +59,7 @@ trainlabels, testlabels = labs[train_indices], labs[test_indices]
 hidden_1 = 3
 input_layer = 9
 a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
-print(a1)
+# print(a1)
+
+network = DeepNeuralNetwork(sizes=[784, 128, 64, 10])
+network.train(trainimages, trainlabels, testimages, testlabels)
