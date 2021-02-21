@@ -2,7 +2,7 @@ import numpy as np
 import struct
 import random
 from dnn import DeepNeuralNetwork
-
+import time
 
 # https://mlfromscratch.com/neural-network-tutorial/#/
 trainsize = 0.8
@@ -28,7 +28,7 @@ with open("labels", "rb") as i:
 size=10000
 imgs=imgs[50000:]
 labs=labs[50000:]
-print(imgs.shape)
+#print(imgs.shape)
 
 # To categorial: one-hot matrix:
 cats = np.zeros((size, 10))
@@ -61,5 +61,10 @@ input_layer = 9
 a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 # print(a1)
 
+
+
+#sys.exit()
+
+
 network = DeepNeuralNetwork(sizes=[784, 128, 64, 10])
-network.train(trainimages, trainlabels, testimages, testlabels)
+network.train(trainimages,trainlabels,testimages,testlabels)

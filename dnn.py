@@ -18,19 +18,20 @@ class DeepNeuralNetwork:
 
     def initializeNet(self):
 
-        # initialize the sizes for the NN layers
-        input, hiddenOne, hiddenTwo, output = (
-            self.sizes[0],
-            self.sizes[1],
-            self.sizes[2],
-            self.sizes[3],
-        )
+        # number of nodes in each layer
+        input_layer=self.sizes[0]
+        hidden_1=self.sizes[1]
+        hidden_2=self.sizes[2]
+        output_layer=self.sizes[3]
 
-        # Weight vectors!
         params = {
-            "W1": np.random.randn(hiddenOne, input) * np.sqrt(1.0 / hiddenOne),
-            "W2": np.random.randn(hiddenTwo, hiddenOne) * np.sqrt(1.0 / hiddenTwo),
-            "W3": np.random.randn(output, hiddenTwo) * np.sqrt(1.0 / output),
+            'W1':np.random.randn(hidden_1, input_layer) * np.sqrt(1. / hidden_1),
+            'W2':np.random.randn(hidden_2, hidden_1) * np.sqrt(1. / hidden_2),
+            'W3':np.random.randn(output_layer, hidden_2) * np.sqrt(1. / output_layer),
+            'BI':np.random.uniform()*np.sqrt(1./input_layer),
+            'B1':np.random.uniform()*np.sqrt(1./hidden_1),
+            'B2':np.random.uniform()*np.sqrt(1./hidden_2),
+            'BO':np.random.uniform()*np.sqrt(1./output_layer),
         }
 
         return params
@@ -50,18 +51,18 @@ class DeepNeuralNetwork:
         params = self.params
 
         # input layer activations becomes sample
-        params['A0'] = x_train
+        params['A0'] = x_train+params['BI']
 
         # input layer to hidden layer 1
-        params['Z1'] = np.dot(params["W1"], params['A0'])
+        params['Z1'] = np.dot(params["W1"], params['A0'])+params['B1']
         params['A1'] = self.sigmoid(params['Z1'])
 
         # hidden layer 1 to hidden layer 2
-        params['Z2'] = np.dot(params["W2"], params['A1'])
+        params['Z2'] = np.dot(params["W2"], params['A1'])+params['B2']
         params['A2'] = self.sigmoid(params['Z2'])
 
         # hidden layer 2 to output layer
-        params['Z3'] = np.dot(params["W3"], params['A2'])
+        params['Z3'] = np.dot(params["W3"], params['A2'])+params['BO']
         params['A3'] = self.softmax(params['Z3'])
 
         return params['A3']
@@ -107,6 +108,8 @@ class DeepNeuralNetwork:
 
         for key, value in changes_to_w.items():
             self.params[key] -= self.gamma * value
+        #for key, value in changes_to_b.items():
+        #    self.params[key] -= self.gamma * value
 
     def computeAccuracy(self, x_val, y_val):
 
