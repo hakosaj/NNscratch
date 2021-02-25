@@ -44,7 +44,7 @@ class DeepNeuralNetwork:
     def leakyRelu(self, x, derivative=False):
         if derivative:
             return np.full((x.shape),1) if x>0 else np.full((x.shape),0.01)
-        return x if x>0 else x*0.01
+        return np.array(list(map(lambda f: f if f>0 else f*0.01,x)))
 
     def softmax(self, x, derivative=False):
         exps = np.exp(x - x.max())
