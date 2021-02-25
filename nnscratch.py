@@ -24,11 +24,11 @@ with open("labels", "rb") as i:
     labs = np.fromfile(i, dtype=np.dtype(np.uint8)).newbyteorder(">")
 
 
-#Reduced size for testing
-size=10000
-imgs=imgs[50000:]
-labs=labs[50000:]
-#print(imgs.shape)
+# Reduced size for testing
+# size=10000
+# imgs=imgs[50000:]
+# labs=labs[50000:]
+# print(imgs.shape)
 
 # To categorial: one-hot matrix:
 cats = np.zeros((size, 10))
@@ -62,9 +62,8 @@ a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 # print(a1)
 
 
-
-#sys.exit()
+# sys.exit()
 
 
 network = DeepNeuralNetwork(sizes=[784, 128, 64, 10])
-network.train(trainimages,trainlabels,testimages,testlabels)
+network.train(trainimages, trainlabels, testimages, testlabels)
