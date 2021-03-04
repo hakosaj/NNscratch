@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import math
 import collections
 class DeepNeuralNetwork:
 
@@ -8,11 +9,21 @@ class DeepNeuralNetwork:
     # Second hidden layer: reduce to 8x8 = 64
     # Output layer: reduce to last 10
 
-    def __init__(self, sizes, epochs=10, gamma=0.2):
+    def __init__(self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False):
         self.sizes = sizes
         self.epochs = epochs
         self.gamma = gamma
+        self.variableGamma=variableGamma
+        self.decreasing=decreasing
         self.params = self.initializeNet()
+
+        if variableGamma:
+            if decreasing:
+                self.gamma=0.2
+            else:
+                self.gamma=0.0001
+        self.losses=[]
+        self.gammas=[]
         print(f"Initialized network with layers as {self.sizes}")
 
     def initializeNet(self):
@@ -146,8 +157,16 @@ class DeepNeuralNetwork:
                     iteration + 1, time.time() - start_time, acc
                 )
             )
-            self.gamma=self.gamma**1.3
-            print(self.gamma)
+            if self.variableGamma:
+                if not self.decreasing:
+                    self.gamma=self.gamma**0.85
+                else:
+                    self.gamma=self.gamma**1.15
+
+        print("Training done")
+        return self.gammas,self.losses
+
+
 
     def updateNetworkParameters(self, changes_to_w, changes_to_b):
         for key, value in changes_to_w.items():
@@ -155,15 +174,21 @@ class DeepNeuralNetwork:
         # for key, value in changes_to_b.items():
         #    self.params[key] -= self.gamma * value
 
+
+
     def computeAccuracy(self, x_val, y_val):
 
         preds = []
-
+        #outputs=[]
+        logloss=0
 
         for x, y in zip(x_val, y_val):
-            pred = np.argmax(self.forwardPass2(x))
+            outp=self.forwardPass2(x)
+            pred = np.argmax(outp)
             preds.append(pred == np.argmax(y))
-
+            logloss+=np.dot(y,np.log(outp))
+        self.gammas.append(self.gamma)
+        self.losses.append(logloss)
 
 
         return np.mean(preds)

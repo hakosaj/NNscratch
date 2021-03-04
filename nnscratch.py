@@ -1,6 +1,7 @@
 import numpy as np
 import struct
 import random
+import matplotlib.pyplot as plt
 from dnn import DeepNeuralNetwork
 import time
 
@@ -25,9 +26,9 @@ with open("labels", "rb") as i:
 
 
 # Reduced size for testing
-#size=10000
-#imgs=imgs[50000:]
-#labs=labs[50000:]
+#size=8000
+#imgs=imgs[52000:]
+#labs=labs[52000:]
 # print(imgs.shape)
 
 # To categorial: one-hot matrix:
@@ -65,5 +66,25 @@ a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 # sys.exit()
 
 
-network = DeepNeuralNetwork(sizes=[784, 128, 64, 10])
-network.train(trainimages, trainlabels, testimages, testlabels)
+#network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=True)
+varGamma=True
+network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=varGamma,decreasing=True)
+gammas,losses=network.train(trainimages, trainlabels, testimages, testlabels)
+
+
+#Plot the losses and learning rates, only if adaptive learning is used!
+if varGamma:
+    if decreasing:
+        plt.plot(gammas,losses)
+        plt.xscale("log")
+        plt.axis([min(gammas), max(gammas),min(losses), max(losses)])
+        plt.xlabel("learning rate")
+        plt.ylabel("loss")
+        plt.show()
+    else:
+        plt.plot(gammas,losses)
+        plt.xscale("log")
+        plt.axis([min(gammas), max(gammas),max(losses), min(losses)])
+        plt.xlabel("learning rate")
+        plt.ylabel("loss")
+        plt.show()
