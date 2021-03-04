@@ -25,9 +25,9 @@ with open("labels", "rb") as i:
 
 
 # Reduced size for testing
-# size=10000
-# imgs=imgs[50000:]
-# labs=labs[50000:]
+#size=10000
+#imgs=imgs[50000:]
+#labs=labs[50000:]
 # print(imgs.shape)
 
 # To categorial: one-hot matrix:
@@ -54,7 +54,7 @@ train_indices = randindices[:trainN]
 test_indices = randindices[trainN:]
 
 trainimages, testimages = imgs[train_indices], imgs[test_indices]
-trainlabels, testlabels = labs[train_indices], labs[test_indices]
+trainlabels, testlabels = cats[train_indices], cats[test_indices]
 
 hidden_1 = 3
 input_layer = 9
