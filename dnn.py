@@ -38,9 +38,9 @@ class DeepNeuralNetwork:
             "W1": np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1),
             "W2": np.random.randn(hidden_2, hidden_1) * np.sqrt(1.0 / hidden_2),
             "W3": np.random.randn(output_layer, hidden_2) * np.sqrt(1.0 / output_layer),
-            "B1": np.random.uniform(hidden_1) * np.sqrt(1.0 / hidden_1),
-            "B2": np.random.uniform(hidden_2) * np.sqrt(1.0 / hidden_2),
-            "BO": np.random.uniform(output_layer) * np.sqrt(1.0 / output_layer),
+            "B1": np.random.randn(hidden_1) * np.sqrt(1.0 / hidden_1),
+            "B2": np.random.randn(hidden_2) * np.sqrt(1.0 / hidden_2),
+            "BO": np.random.randn(output_layer) * np.sqrt(1.0 / output_layer),
         }
 
         return params
@@ -69,17 +69,17 @@ class DeepNeuralNetwork:
 
         # input layer to hidden layer 1
         params["Z1"] = np.dot(params["W1"], params["A0"])
-        # params["Z1"] += params["B1"]
+        params["Z1"] += params["B1"]
         params["A1"] = self.sigmoid(params["Z1"])
 
         # hidden layer 1 to hidden layer 2
         params["Z2"] = np.dot(params["W2"], params["A1"])
-        # params["Z2"] += params["B2"]
+        params["Z2"] += params["B2"]
         params["A2"] = self.sigmoid(params["Z2"])
 
         # hidden layer 2 to output layer
         params["Z3"] = np.dot(params["W3"], params["A2"])
-        # params["Z3"] += params["BO"]
+        params["Z3"] += params["BO"]
         params["A3"] = self.softmax(params["Z3"])
 
         return params["A3"]
@@ -92,17 +92,17 @@ class DeepNeuralNetwork:
 
         # input layer to hidden layer 1
         params["Z1"] = np.dot(params["W1"], params["A0"])
-        # params["Z1"] += params["B1"]
+        params["Z1"] += params["B1"]
         params["A1"] = self.leakyRelu(params["Z1"])
 
         # hidden layer 1 to hidden layer 2
         params["Z2"] = np.dot(params["W2"], params["A1"])
-        # params["Z2"] += params["B2"]
+        params["Z2"] += params["B2"]
         params["A2"] = self.leakyRelu(params["Z2"])
 
         # hidden layer 2 to output layer
         params["Z3"] = np.dot(params["W3"], params["A2"])
-        # params["Z3"] += params["BO"]
+        params["Z3"] += params["BO"]
         params["A3"] = self.softmax(params["Z3"])
 
         return params["A3"]
@@ -121,21 +121,21 @@ class DeepNeuralNetwork:
             * self.softmax(params["Z3"], derivative=True)
         )
         change_w["W3"] = np.outer(error, params["A2"])
-        #change_b["BO"] = error
+        change_b["BO"] = error
 
         # Calculate W2 update
         error = np.dot(params["W3"].T, error) * self.sigmoid(
             params["Z2"], derivative=True
         )
         change_w["W2"] = np.outer(error, params["A1"])
-        #change_b["B2"] = error
+        change_b["B2"] = error
 
         # Calculate W1 update
         error = np.dot(params["W2"].T, error) * self.sigmoid(
             params["Z1"], derivative=True
         )
         change_w["W1"] = np.outer(error, params["A0"])
-        #change_b["B1"] = error
+        change_b["B1"] = error
 
         return change_w, change_b
 
@@ -160,7 +160,7 @@ class DeepNeuralNetwork:
             print(f"loss: {loss}")
 
 
-            
+
             if self.variableGamma:
                 if not self.decreasing:
                     self.gamma=self.gamma**0.85
@@ -175,8 +175,8 @@ class DeepNeuralNetwork:
     def updateNetworkParameters(self, changes_to_w, changes_to_b):
         for key, value in changes_to_w.items():
             self.params[key] -= self.gamma * value
-        # for key, value in changes_to_b.items():
-        #    self.params[key] -= self.gamma * value
+        for key, value in changes_to_b.items():
+            self.params[key] -= self.gamma * value
 
 
 

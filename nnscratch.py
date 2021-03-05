@@ -34,6 +34,8 @@ with open("labels", "rb") as i:
 # Reduced size for testing
 try:
     sz=int(round(float(sys.argv[1])*len(labs)))
+    if sz>60000:
+        sz=60000
     size=sz
     imgs=imgs[60000-sz:]
     labs=labs[60000-sz:]
