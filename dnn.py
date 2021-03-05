@@ -146,17 +146,21 @@ class DeepNeuralNetwork:
             i = 0
             for x, y in zip(x_train, y_train):
                 i += 1
-                if i % 2000 == 0:
-                    print(f"done {i}/{len(x_train)}")
+                #if i % 2000 == 0:
+                    #print(f"done {i}/{len(x_train)}")
                 a, b = self.backprop(y, self.forwardPass2(x))
                 self.updateNetworkParameters(a, b)
 
-            acc = self.computeAccuracy(x_val, y_val)
+            acc, loss = self.computeAccuracy(x_val, y_val)
             print(
-                "Epoch: {0}, Time Spent: {1:.2f}s, Accuracy: {2}".format(
+                "Epoch: {0}, Time Spent: {1:.2f}s, Accuracy: {2},".format(
                     iteration + 1, time.time() - start_time, acc
-                )
+                ),end=' '
             )
+            print(f"loss: {loss}")
+
+
+            
             if self.variableGamma:
                 if not self.decreasing:
                     self.gamma=self.gamma**0.85
@@ -191,4 +195,4 @@ class DeepNeuralNetwork:
         self.losses.append(logloss)
 
 
-        return np.mean(preds)
+        return np.mean(preds), logloss

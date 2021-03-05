@@ -4,10 +4,16 @@ import random
 import matplotlib.pyplot as plt
 from dnn import DeepNeuralNetwork
 import time
+import sys
 
 # https://mlfromscratch.com/neural-network-tutorial/#/
 trainsize = 0.8
 testsize = 1 - trainsize
+
+
+
+
+plotting=True
 
 with open("images", "rb") as f:
     magic, size = struct.unpack(">II", f.read(8))
@@ -26,9 +32,16 @@ with open("labels", "rb") as i:
 
 
 # Reduced size for testing
-#size=8000
-#imgs=imgs[52000:]
-#labs=labs[52000:]
+try:
+    sz=float(sys.argv[1])*len(labs)
+    size=4000
+    imgs=imgs[56000:]
+    labs=labs[56000:]
+except IndexError:
+    sz=0
+    
+    pass
+
 # print(imgs.shape)
 
 # To categorial: one-hot matrix:
@@ -37,7 +50,8 @@ for i in range(len(labs)):
     vl = labs[i]
     cats[i][vl] = 1
 
-print("categorials done")
+#print("categorials done")
+print(f"Using {len(labs) if sz==0 else size} samples")
 
 
 ##At this stage, imgs is 60000*784 pixel images between 0 and 1
@@ -74,18 +88,19 @@ gammas,losses=network.train(trainimages, trainlabels, testimages, testlabels)
 
 
 #Plot the losses and learning rates, only if adaptive learning is used!
-if varGamma:
-    if decreasing:
-        plt.plot(gammas,losses)
-        plt.xscale("log")
-        plt.axis([min(gammas), max(gammas),min(losses), max(losses)])
-        plt.xlabel("learning rate")
-        plt.ylabel("loss")
-        plt.show()
-    else:
-        plt.plot(gammas,losses)
-        plt.xscale("log")
-        plt.axis([min(gammas), max(gammas),max(losses), min(losses)])
-        plt.xlabel("learning rate")
-        plt.ylabel("loss")
-        plt.show()
+if plotting:
+    if varGamma:
+        if decreasing:
+            plt.plot(gammas,losses)
+            plt.xscale("log")
+            plt.axis([max(gammas)*1.1 , min(gammas)*1.1,min(losses)*1.01, max(losses)*0.9])
+            plt.xlabel("learning rate")
+            plt.ylabel("loss")
+            plt.show()
+        else:
+            plt.plot(gammas,losses)
+            plt.xscale("log")
+            plt.axis([min(gammas), max(gammas),max(losses), min(losses)])
+            plt.xlabel("learning rate")
+            plt.ylabel("loss")
+            plt.show()
