@@ -2,6 +2,8 @@ import numpy as np
 import time
 import math
 import collections
+
+
 class DeepNeuralNetwork:
 
     # Input layer: flattened 28x28=784
@@ -9,41 +11,42 @@ class DeepNeuralNetwork:
     # Second hidden layer: reduce to 8x8 = 64
     # Output layer: reduce to last 10
 
-    def __init__(self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False):
+    def __init__(
+        self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False
+    ):
         self.sizes = sizes
         self.epochs = epochs
         self.gamma = gamma
-        self.variableGamma=variableGamma
-        self.decreasing=decreasing
+        self.variableGamma = variableGamma
+        self.decreasing = decreasing
         self.params = self.initializeVariableNet()
 
         if variableGamma:
             if decreasing:
-                self.gamma=0.2
+                self.gamma = 0.2
             else:
-                self.gamma=0.0001
-        self.losses=[]
-        self.gammas=[]
+                self.gamma = 0.0001
+        self.losses = []
+        self.gammas = []
         print(f"Initialized network with layers as {self.sizes}")
 
-
     def initializeVariableNet(self):
-        #Input layer and output layer always exist
-        layers=self.sizes
+        # Input layer and output layer always exist
+        layers = self.sizes
 
-        params={}
-        for i in range(0,len(layers)-1):
-            params[f"W{i+1}"]=np.random.randn(layers[i+1],layers[i])*np.sqrt(1.0/layers[i+1])
+        params = {}
+        for i in range(0, len(layers) - 1):
+            params[f"W{i+1}"] = np.random.randn(layers[i + 1], layers[i]) * np.sqrt(
+                1.0 / layers[i + 1]
+            )
 
-        for i in range(0,len(layers)-2):
-            params[f"B{i+1}"]=np.random.randn(layers[i+1])*np.sqrt(1.0/layers[i+1])
-        params[f"BO"]=np.random.randn(layers[-1])*np.sqrt(1.0/layers[-1])
-
+        for i in range(0, len(layers) - 2):
+            params[f"B{i+1}"] = np.random.randn(layers[i + 1]) * np.sqrt(
+                1.0 / layers[i + 1]
+            )
+        params[f"BO"] = np.random.randn(layers[-1]) * np.sqrt(1.0 / layers[-1])
 
         return params
-        
-
-
 
     def initializeNet(self):
 
@@ -103,36 +106,29 @@ class DeepNeuralNetwork:
 
         return params["A3"]
 
+    def variableForwardPass(self, x_train):
+        params = self.params
 
+        params["A0"] = x_train
+        # All layers except output
+        for i in range(0, len(self.sizes) - 2):
+            params[f"Z{i+1}"] = np.dot(params[f"W{i+1}"], params[f"A{i}"])
+            params[f"Z{i+1}"] += params[f"B{i+1}"]
+            params[f"A{i+1}"] = self.leakyRelu(params[f"Z{i+1}"])
 
-    def variableForwardPass(self,x_train):
-        params=self.params
-
-        params["A0"]=x_train
-        #All layers except output
-        for i in range(0,len(self.sizes)-2):
-            params[f"Z{i+1}"]=np.dot(params[f"W{i+1}"],params[f"A{i}"])
-            params[f"Z{i+1}"]+=params[f"B{i+1}"]
-            params[f"A{i+1}"]=self.leakyRelu(params[f"Z{i+1}"])
-
-
-        #Output
-        last=len(self.sizes)-1
-        params[f"Z{last}"]=np.dot(params[f"W{last}"],params[f"A{last-1}"])
-        params[f"Z{last}"]+= params["BO"]
-        params[f"A{last}"]=self.softmax(params[f"Z{last}"])
-
+        # Output
+        last = len(self.sizes) - 1
+        params[f"Z{last}"] = np.dot(params[f"W{last}"], params[f"A{last-1}"])
+        params[f"Z{last}"] += params["BO"]
+        params[f"A{last}"] = self.softmax(params[f"Z{last}"])
 
         return params[f"A{last}"]
-
-
 
     def forwardPass(self, x_train):
         params = self.params
 
         # input layer activations becomes sample
         params["A0"] = x_train
-
 
         # input layer to hidden layer 1
         params["Z1"] = np.dot(params["W1"], params["A0"])
@@ -144,16 +140,15 @@ class DeepNeuralNetwork:
         params["Z2"] += params["B2"]
         params["A2"] = self.leakyRelu(params["Z2"])
 
-
-
-
         # hidden layer 2 to output layer
         params["Z3"] = np.dot(params["W3"], params["A2"])
         params["Z3"] += params["BO"]
         params["A3"] = self.softmax(params["Z3"])
 
-
         return params["A3"]
+
+    def variableBackprop(self, y_train, output):
+        params = self.params
 
     def backprop(self, y_train, output):
 
@@ -194,9 +189,9 @@ class DeepNeuralNetwork:
             i = 0
             for x, y in zip(x_train, y_train):
                 i += 1
-                #if i % 2000 == 0:
-                    #print(f"done {i}/{len(x_train)}")
-                #self.variableForwardPass(x)
+                # if i % 2000 == 0:
+                # print(f"done {i}/{len(x_train)}")
+                # self.variableForwardPass(x)
                 a, b = self.backprop(y, self.variableForwardPass(x))
                 self.updateNetworkParameters(a, b)
 
@@ -204,22 +199,19 @@ class DeepNeuralNetwork:
             print(
                 "Epoch: {0}, Time Spent: {1:.2f}s, Accuracy: {2},".format(
                     iteration + 1, time.time() - start_time, acc
-                ),end=' '
+                ),
+                end=" ",
             )
             print(f"loss: {loss}")
 
-
-
             if self.variableGamma:
                 if not self.decreasing:
-                    self.gamma=self.gamma**0.85
+                    self.gamma = self.gamma ** 0.85
                 else:
-                    self.gamma=self.gamma**1.15
+                    self.gamma = self.gamma ** 1.15
 
         print("Training done")
-        return self.gammas,self.losses
-
-
+        return self.gammas, self.losses
 
     def updateNetworkParameters(self, changes_to_w, changes_to_b):
         for key, value in changes_to_w.items():
@@ -227,21 +219,18 @@ class DeepNeuralNetwork:
         for key, value in changes_to_b.items():
             self.params[key] -= self.gamma * value
 
-
-
     def computeAccuracy(self, x_val, y_val):
 
         preds = []
-        #outputs=[]
-        logloss=0
+        # outputs=[]
+        logloss = 0
 
         for x, y in zip(x_val, y_val):
-            outp=self.variableForwardPass(x)
+            outp = self.variableForwardPass(x)
             pred = np.argmax(outp)
             preds.append(pred == np.argmax(y))
-            logloss+=np.dot(y,np.log(outp))
+            logloss += np.dot(y, np.log(outp))
         self.gammas.append(self.gamma)
         self.losses.append(logloss)
-
 
         return np.mean(preds), logloss

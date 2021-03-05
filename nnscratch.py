@@ -11,9 +11,7 @@ trainsize = 0.8
 testsize = 1 - trainsize
 
 
-
-
-plotting=True
+plotting = True
 
 with open("images", "rb") as f:
     magic, size = struct.unpack(">II", f.read(8))
@@ -33,15 +31,15 @@ with open("labels", "rb") as i:
 
 # Reduced size for testing
 try:
-    sz=int(round(float(sys.argv[1])*len(labs)))
-    if sz>60000:
-        sz=60000
-    size=sz
-    imgs=imgs[60000-sz:]
-    labs=labs[60000-sz:]
+    sz = int(round(float(sys.argv[1]) * len(labs)))
+    if sz > 60000:
+        sz = 60000
+    size = sz
+    imgs = imgs[60000 - sz :]
+    labs = labs[60000 - sz :]
 except IndexError:
-    sz=0
-    
+    sz = 0
+
     pass
 
 # print(imgs.shape)
@@ -52,7 +50,7 @@ for i in range(len(labs)):
     vl = labs[i]
     cats[i][vl] = 1
 
-#print("categorials done")
+# print("categorials done")
 print(f"Using {len(labs) if sz==0 else size} samples")
 
 
@@ -82,27 +80,36 @@ a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 # sys.exit()
 
 
-#network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=True)
-varGamma=True
-decreasing=True
-network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=varGamma,decreasing=decreasing)
-gammas,losses=network.train(trainimages, trainlabels, testimages, testlabels)
+# network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=True)
+varGamma = True
+decreasing = True
+network = DeepNeuralNetwork(
+    sizes=[784, 128, 64, 10], variableGamma=varGamma, decreasing=decreasing
+)
+gammas, losses = network.train(trainimages, trainlabels, testimages, testlabels)
 
 
-#Plot the losses and learning rates, only if adaptive learning is used!
+# Plot the losses and learning rates, only if adaptive learning is used!
 if plotting:
     if varGamma:
         if decreasing:
-            plt.plot(gammas,losses)
+            plt.plot(gammas, losses)
             plt.xscale("log")
-            plt.axis([max(gammas)*1.1 , min(gammas)*1.1,min(losses)*1.01, max(losses)*0.9])
+            plt.axis(
+                [
+                    max(gammas) * 1.1,
+                    min(gammas) * 1.1,
+                    min(losses) * 1.01,
+                    max(losses) * 0.9,
+                ]
+            )
             plt.xlabel("learning rate")
             plt.ylabel("loss")
             plt.show()
         else:
-            plt.plot(gammas,losses)
+            plt.plot(gammas, losses)
             plt.xscale("log")
-            plt.axis([min(gammas), max(gammas),max(losses), min(losses)])
+            plt.axis([min(gammas), max(gammas), max(losses), min(losses)])
             plt.xlabel("learning rate")
             plt.ylabel("loss")
             plt.show()
