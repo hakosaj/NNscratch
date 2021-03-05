@@ -33,10 +33,10 @@ with open("labels", "rb") as i:
 
 # Reduced size for testing
 try:
-    sz=float(sys.argv[1])*len(labs)
-    size=4000
-    imgs=imgs[56000:]
-    labs=labs[56000:]
+    sz=int(round(float(sys.argv[1])*len(labs)))
+    size=sz
+    imgs=imgs[60000-sz:]
+    labs=labs[60000-sz:]
 except IndexError:
     sz=0
     
