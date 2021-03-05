@@ -149,6 +149,28 @@ class DeepNeuralNetwork:
 
     def variableBackprop(self, y_train, output):
         params = self.params
+        change_w = {}
+        change_b = {}
+
+        # Last update
+        last = len(self.sizes) - 1
+        error = (
+            2
+            * (output - y_train)
+            / output.shape[0]
+            * self.softmax(params[f"Z{last}"], derivative=True)
+        )
+        change_w[f"W{last}"] = np.outer(error, params[f"A{last-1}"])
+        change_b["BO"] = error
+
+        for i in reversed(range(1, last)):
+            error = np.dot(params[f"W{i+1}"].T, error) * self.sigmoid(
+                params[f"Z{i}"], derivative=True
+            )
+            change_w[f"W{i}"] = np.outer(error, params[f"A{i-1}"])
+            change_b[f"B{i}"] = error
+
+        return change_w, change_b
 
     def backprop(self, y_train, output):
 
@@ -192,7 +214,7 @@ class DeepNeuralNetwork:
                 # if i % 2000 == 0:
                 # print(f"done {i}/{len(x_train)}")
                 # self.variableForwardPass(x)
-                a, b = self.backprop(y, self.variableForwardPass(x))
+                a, b = self.variableBackprop(y, self.variableForwardPass(x))
                 self.updateNetworkParameters(a, b)
 
             acc, loss = self.computeAccuracy(x_val, y_val)

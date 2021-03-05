@@ -84,7 +84,7 @@ a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 varGamma = True
 decreasing = True
 network = DeepNeuralNetwork(
-    sizes=[784, 128, 64, 10], variableGamma=varGamma, decreasing=decreasing
+    sizes=[784, 361, 128, 64, 10], variableGamma=varGamma, decreasing=decreasing
 )
 gammas, losses = network.train(trainimages, trainlabels, testimages, testlabels)
 
