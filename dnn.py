@@ -12,7 +12,7 @@ class DeepNeuralNetwork:
     # Output layer: reduce to last 10
 
     def __init__(
-        self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False, optimizer="SGD"
+        self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False, optimizer="MBGD"
     ):
         self.sizes = sizes
         self.epochs = epochs
@@ -224,14 +224,15 @@ class DeepNeuralNetwork:
                 i += 1
                 if i % 2000 == 0:
                     print(f"done {i}/{len(x_train)}")
+
+
+
+                a, b = self.variableBackprop(y, self.variableForwardPass(x))
+
+                
                 if self.optimizer=="SGD":
-                    a, b = self.variableBackprop(y, self.variableForwardPass(x))
                     self.updateNetworkParameters(a, b)
-
                 if self.optimizer=="MBGD":
-
-                    
-                    a, b = self.variableBackprop(y, self.variableForwardPass(x))
                     if not passflag:
                         ws=a
                         bs=b
