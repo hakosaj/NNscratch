@@ -12,7 +12,7 @@ class DeepNeuralNetwork:
     # Output layer: reduce to last 10
 
     def __init__(
-        self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False
+        self, sizes, epochs=12, gamma=0.08, variableGamma=False, decreasing=False, optimizer="SGD"
     ):
         self.sizes = sizes
         self.epochs = epochs
@@ -20,6 +20,7 @@ class DeepNeuralNetwork:
         self.variableGamma = variableGamma
         self.decreasing = decreasing
         self.params = self.initializeVariableNet()
+        self.optimizer=optimizer
 
         if variableGamma:
             if decreasing:
@@ -209,13 +210,48 @@ class DeepNeuralNetwork:
         start_time = time.time()
         for iteration in range(self.epochs):
             i = 0
+
+            if self.optimizer=="MBGD":
+                g=0
+                batchSize=50
+                ws={}
+                bs={}
+                passflag=False
+
+
+
             for x, y in zip(x_train, y_train):
                 i += 1
-                # if i % 2000 == 0:
-                # print(f"done {i}/{len(x_train)}")
-                # self.variableForwardPass(x)
-                a, b = self.variableBackprop(y, self.variableForwardPass(x))
-                self.updateNetworkParameters(a, b)
+                if i % 2000 == 0:
+                    print(f"done {i}/{len(x_train)}")
+                if self.optimizer=="SGD":
+                    a, b = self.variableBackprop(y, self.variableForwardPass(x))
+                    self.updateNetworkParameters(a, b)
+
+                if self.optimizer=="MBGD":
+
+                    
+                    a, b = self.variableBackprop(y, self.variableForwardPass(x))
+                    if not passflag:
+                        ws=a
+                        bs=b
+                        passflag=True
+                    else:
+                        for key, value in a.items():
+                            ws[key]+=value
+                        for key, value in b.items():
+                            bs[key]+=value
+                    g+=1
+                    if g==batchSize:
+                        ws= {k: v/batchSize for k,v in ws.items()}
+                        bs= {k: v/batchSize for k,v in bs.items()}
+                        self.updateNetworkParameters(ws,bs)
+                        passflag=False
+                        g=0
+
+            
+
+
 
             acc, loss = self.computeAccuracy(x_val, y_val)
             print(
