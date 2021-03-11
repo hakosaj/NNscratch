@@ -17,7 +17,7 @@ class DeepNeuralNetwork:
 
     def __init__(
         self,
-        sizes,
+        sizes=[784, 128, 64, 32, 10],
         epochs=25,
         gamma=0.1,
         batchSize=32,
@@ -157,29 +157,6 @@ class DeepNeuralNetwork:
 
         return params[f"A{last}"]
 
-    def forwardPass(self, x_train):
-        params = self.params
-
-        # input layer activations becomes sample
-        params["A0"] = x_train
-
-        # input layer to hidden layer 1
-        params["Z1"] = np.dot(params["W1"], params["A0"])
-        params["Z1"] += params["B1"]
-        params["A1"] = self.leakyRelu(params["Z1"])
-
-        # hidden layer 1 to hidden layer 2
-        params["Z2"] = np.dot(params["W2"], params["A1"])
-        params["Z2"] += params["B2"]
-        params["A2"] = self.leakyRelu(params["Z2"])
-
-        # hidden layer 2 to output layer
-        params["Z3"] = np.dot(params["W3"], params["A2"])
-        params["Z3"] += params["BO"]
-        params["A3"] = self.softmax(params["Z3"])
-
-        return params["A3"]
-
     def variableBackprop(self, y_train, output):
         params = self.params
         change_w = {}
@@ -202,38 +179,6 @@ class DeepNeuralNetwork:
             )
             change_w[f"W{i}"] = np.outer(error, params[f"A{i-1}"])
             change_b[f"B{i}"] = error
-
-        return change_w, change_b
-
-    def backprop(self, y_train, output):
-
-        params = self.params
-        change_w = {}
-        change_b = {}
-
-        # Calculate W3 update
-        error = (
-            2
-            * (output - y_train)
-            / output.shape[0]
-            * self.softmax(params["Z3"], derivative=True)
-        )
-        change_w["W3"] = np.outer(error, params["A2"])
-        change_b["BO"] = error
-
-        # Calculate W2 update
-        error = np.dot(params["W3"].T, error) * self.sigmoid(
-            params["Z2"], derivative=True
-        )
-        change_w["W2"] = np.outer(error, params["A1"])
-        change_b["B2"] = error
-
-        # Calculate W1 update
-        error = np.dot(params["W2"].T, error) * self.sigmoid(
-            params["Z1"], derivative=True
-        )
-        change_w["W1"] = np.outer(error, params["A0"])
-        change_b["B1"] = error
 
         return change_w, change_b
 
