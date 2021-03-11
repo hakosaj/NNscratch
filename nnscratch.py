@@ -108,17 +108,20 @@ def net():
     input_layer = 9
     a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 
+    # Define NN parameters here
     sizes = [784, 128, 96, 64, 40, 32, 10]
     varGamma = True
     decreasing = True
     epochs = 20
+    gamma = 0.01
     batchSize = 32
     optimizer = "SGD"
-    activation = "LeakyRELU"
+    activation = "leakyRELU"
 
     network = DeepNeuralNetwork(
         sizes=sizes,
         epochs=epochs,
+        gamma=gamma,
         batchSize=batchSize,
         variableGamma=varGamma,
         decreasing=decreasing,

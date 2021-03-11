@@ -19,12 +19,12 @@ class DeepNeuralNetwork:
         self,
         sizes=[784, 128, 64, 32, 10],
         epochs=25,
-        gamma=0.1,
+        gamma=0.01,
         batchSize=32,
         variableGamma=False,
         decreasing=False,
         optimizer="SGD",
-        activation="LeakyRELU",
+        activation="leakyRELU",
     ):
         self.sizes = sizes
         self.epochs = epochs
@@ -130,12 +130,14 @@ class DeepNeuralNetwork:
             params[f"Z{i+1}"] = np.dot(params[f"W{i+1}"], params[f"A{i}"])
             params[f"Z{i+1}"] += params[f"B{i+1}"]
 
-            if self.activation == "LeakyRELU":
+            if self.activation == "leakyRELU":
                 params[f"A{i+1}"] = self.leakyRelu(params[f"Z{i+1}"])
             elif self.activation == "RELU":
                 params[f"A{i+1}"] = self.relu(params[f"Z{i+1}"])
-            else:
+            elif self.activation == "sigmoid":
                 params[f"A{i+1}"] = self.sigmoid(params[f"Z{i+1}"])
+            else:
+                params[f"A{i+1}"] = self.leakyRelu(params[f"Z{i+1}"])
 
         # Output
         last = len(self.sizes) - 1
