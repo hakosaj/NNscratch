@@ -15,7 +15,7 @@ class DeepNeuralNetwork:
     def __init__(
         self,
         sizes,
-        epochs=15,
+        epochs=20,
         gamma=0.01,
         batchSize=20,
         variableGamma=False,
@@ -43,7 +43,7 @@ class DeepNeuralNetwork:
 
         if variableGamma:
             if decreasing:
-                self.gamma = 0.3
+                self.gamma = 0.5
             else:
                 self.gamma = 0.0001
         self.losses = []
@@ -234,6 +234,14 @@ class DeepNeuralNetwork:
 
         return change_w, change_b
 
+    def printResults(self, iteration, start_time, acc, loss):
+        print(
+            "Epoch: {0}, Time Spent: {1:.2f}s, Learning rate: {2:.5f}".format(
+                iteration + 1, time.time() - start_time, self.gamma
+            ),
+        )
+        print("Accuracy: {0:.5f}, Loss: {1:.5f}\n\n".format(acc, loss))
+
     def train(self, x_train, y_train, x_val, y_val):
         start_time = time.time()
         for iteration in range(self.epochs):
@@ -276,19 +284,13 @@ class DeepNeuralNetwork:
                     pbar.update()
 
             acc, loss = self.computeAccuracy(x_val, y_val)
-            print(
-                "Epoch: {0}, Time Spent: {1:.2f}s, Learning rate: {2:.4f},".format(
-                    iteration + 1, time.time() - start_time, self.gamma
-                ),
-            )
-            print("Accuracy: {0:.5f}, Loss: {1:.5f}\n\n".format(acc, loss))
-            # print(f"loss: {loss}\n\n")
+            self.printResults(iteration, start_time, acc, loss)
 
             if self.variableGamma:
                 if not self.decreasing:
                     self.gamma = self.gamma ** 0.85
                 else:
-                    self.gamma = self.gamma ** 1.15
+                    self.gamma = self.gamma ** 1.2
 
         print("Training done")
         return self.gammas, self.losses
