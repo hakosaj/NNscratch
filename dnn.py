@@ -110,6 +110,11 @@ class DeepNeuralNetwork:
             return np.full((x.shape), 1) if x > 0 else np.full((x.shape), 0.01)
         return np.array(list(map(lambda f: f if f > 0 else f * 0.01, x)))
 
+    def relu(self, x, derivative=False):
+        if derivative:
+            return np.full((x.shape), 1) if x > 0 else np.full((x.shape), 0)
+        return np.array(list(map(lambda f: f if f > 0 else 0, x)))
+
     def softmax(self, x, derivative=False):
         exps = np.exp(x - x.max())
         if derivative:
@@ -124,7 +129,13 @@ class DeepNeuralNetwork:
         for i in range(0, len(self.sizes) - 2):
             params[f"Z{i+1}"] = np.dot(params[f"W{i+1}"], params[f"A{i}"])
             params[f"Z{i+1}"] += params[f"B{i+1}"]
-            params[f"A{i+1}"] = self.leakyRelu(params[f"Z{i+1}"])
+
+            if self.activation == "LeakyRELU":
+                params[f"A{i+1}"] = self.leakyRelu(params[f"Z{i+1}"])
+            elif self.activation == "RELU":
+                params[f"A{i+1}"] = self.relu(params[f"Z{i+1}"])
+            else:
+                params[f"A{i+1}"] = self.sigmoid(params[f"Z{i+1}"])
 
         # Output
         last = len(self.sizes) - 1
