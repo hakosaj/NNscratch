@@ -41,6 +41,8 @@ def unpackImages(imagefile="images", labelfile="labels"):
         Numpy array containing the images scaled down and reshaped
     labs: numpy.ndarray
         Numpy array containing the labels
+    size: integer
+        Number of samples in the whole dataset
 
 
     """
@@ -61,13 +63,13 @@ def unpackImages(imagefile="images", labelfile="labels"):
         magic, size = struct.unpack(">II", i.read(8))
         labs = np.fromfile(i, dtype=np.dtype(np.uint8)).newbyteorder(">")
 
-    return imgs, labs
+    return imgs, labs, size
 
 
 def net():
     trainsize = 0.8
     plotting = True
-    imgs, labs = unpackImages()
+    imgs, labs, size = unpackImages()
 
     try:
         sz = int(round(float(sys.argv[1]) * len(labs)))
@@ -109,7 +111,7 @@ def net():
     a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 
     # Define NN parameters here
-    sizes = [784, 128, 96, 64, 40, 32, 10]
+    sizes = [784, 256, 128, 96, 64, 32, 10]
     varGamma = True
     decreasing = True
     epochs = 20
