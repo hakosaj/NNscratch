@@ -5,7 +5,17 @@ Creating an MNIST NN from scratch without any external libraries except NumPy. I
 Would also be cool to see if I could GA the optimal net dimensions just for funs!
 
 
+Best accuracy so far is **0.91500** with parameters:
 
+   - sizes = [784, 256, 128, 96, 64, 32, 10]
+   - varGamma = True
+   - decreasing = True
+   - epochs = 20
+   - gamma = 0.01
+   - batchSize = 32
+   - optimizer = "SGD"
+   - activation = "leakyRELU"
+   - used 0.2 of the whole dataset
 
 
 # File contents
