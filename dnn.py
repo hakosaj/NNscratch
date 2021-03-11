@@ -116,29 +116,6 @@ class DeepNeuralNetwork:
             return exps / np.sum(exps, axis=0) * (1 - exps / np.sum(exps, axis=0))
         return exps / np.sum(exps, axis=0)
 
-    def forwardPass2(self, x_train):
-        params = self.params
-
-        # input layer activations becomes sample
-        params["A0"] = x_train
-
-        # input layer to hidden layer 1
-        params["Z1"] = np.dot(params["W1"], params["A0"])
-        params["Z1"] += params["B1"]
-        params["A1"] = self.sigmoid(params["Z1"])
-
-        # hidden layer 1 to hidden layer 2
-        params["Z2"] = np.dot(params["W2"], params["A1"])
-        params["Z2"] += params["B2"]
-        params["A2"] = self.sigmoid(params["Z2"])
-
-        # hidden layer 2 to output layer
-        params["Z3"] = np.dot(params["W3"], params["A2"])
-        params["Z3"] += params["BO"]
-        params["A3"] = self.softmax(params["Z3"])
-
-        return params["A3"]
-
     def variableForwardPass(self, x_train):
         params = self.params
 
