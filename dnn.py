@@ -2,6 +2,7 @@ import numpy as np
 import time
 import math
 import collections
+from tqdm import tqdm
 
 
 class DeepNeuralNetwork:
@@ -14,11 +15,12 @@ class DeepNeuralNetwork:
     def __init__(
         self,
         sizes,
-        epochs=12,
-        gamma=0.08,
+        epochs=15,
+        gamma=0.01,
+        batchSize=20,
         variableGamma=False,
         decreasing=False,
-        optimizer="MBGD",
+        optimizer="SGD",
     ):
         self.sizes = sizes
         self.epochs = epochs
@@ -27,6 +29,7 @@ class DeepNeuralNetwork:
         self.decreasing = decreasing
         self.params = self.initializeVariableNet()
         self.optimizer = optimizer
+        self.batchSize = batchSize
 
         # ADAM parameters
         if optimizer == "ADAM":
@@ -38,12 +41,28 @@ class DeepNeuralNetwork:
 
         if variableGamma:
             if decreasing:
-                self.gamma = 0.2
+                self.gamma = 0.3
             else:
                 self.gamma = 0.0001
         self.losses = []
         self.gammas = []
-        print(f"Initialized network with layers as {self.sizes}")
+        self.printNetworkInfo()
+
+
+
+    def printNetworkInfo(self):
+        print(f"\nInitialized network with layers as {self.sizes}")
+        print(f"Using {self.optimizer} as optimizer")
+        if self.variableGamma:
+            print(f"Using an adaptive learning rate, starting from {self.gamma}")
+        else:
+            print(f"Using a static learning rate of {self.gamma}")
+        print(f"Starting network training with {self.epochs} epochs\n")
+
+
+        
+
+
 
     def initializeVariableNet(self):
         # Input layer and output layer always exist
@@ -220,44 +239,45 @@ class DeepNeuralNetwork:
         return change_w, change_b
 
     def train(self, x_train, y_train, x_val, y_val):
-        print(f"Starting network training with {self.epochs} epochs")
         start_time = time.time()
         for iteration in range(self.epochs):
             i = 0
 
             if self.optimizer == "MBGD":
                 g = 0
-                batchSize = 20
+                batchSize = self.batchSize
                 ws = {}
                 bs = {}
                 passflag = False
 
-            for x, y in zip(x_train, y_train):
-                i += 1
-                if i % 2000 == 0:
-                    print(f"done {i}/{len(x_train)}")
+            #for x, y in tqdm(zip(x_train, y_train)):
+            trainiters=zip(x_train, y_train)
+            with tqdm(total=len(x_train)) as pbar:
+                for x,y in trainiters:
+                    i += 1
 
-                a, b = self.variableBackprop(y, self.variableForwardPass(x))
+                    a, b = self.variableBackprop(y, self.variableForwardPass(x))
 
-                if self.optimizer == "SGD":
-                    self.updateNetworkParameters(a, b)
-                if self.optimizer == "MBGD":
-                    if not passflag:
-                        ws = a
-                        bs = b
-                        passflag = True
-                    else:
-                        for key, value in a.items():
-                            ws[key] += value
-                        for key, value in b.items():
-                            bs[key] += value
-                    g += 1
-                    if g == batchSize:
-                        ws = {k: v / batchSize for k, v in ws.items()}
-                        bs = {k: v / batchSize for k, v in bs.items()}
-                        self.updateNetworkParameters(ws, bs)
-                        passflag = False
-                        g = 0
+                    if self.optimizer == "SGD":
+                        self.updateNetworkParameters(a, b)
+                    if self.optimizer == "MBGD":
+                        if not passflag:
+                            ws = a
+                            bs = b
+                            passflag = True
+                        else:
+                            for key, value in a.items():
+                                ws[key] += value
+                            for key, value in b.items():
+                                bs[key] += value
+                        g += 1
+                        if g == batchSize:
+                            ws = {k: v / batchSize for k, v in ws.items()}
+                            bs = {k: v / batchSize for k, v in bs.items()}
+                            self.updateNetworkParameters(ws, bs)
+                            passflag = False
+                            g = 0
+                    pbar.update()
 
             acc, loss = self.computeAccuracy(x_val, y_val)
             print(
@@ -266,7 +286,7 @@ class DeepNeuralNetwork:
                 ),
                 end=" ",
             )
-            print(f"loss: {loss}")
+            print(f"loss: {loss}\n\n")
 
             if self.variableGamma:
                 if not self.decreasing:
