@@ -20,10 +20,10 @@ Best accuracy so far is **0.91500** with parameters:
 
 # File contents
 
-`nnscratch.py` contains all the helper functions and setup functions for the net 
-`dnn.py` class for the deep neural net with all its methods
-`images` MNIST images in binary format
-`labels` MNIST labels in binary format
+- `nnscratch.py` contains all the helper functions and setup functions for the net 
+- `dnn.py` class for the deep neural net with all its methods
+- `images` MNIST images in binary format
+- `labels` MNIST labels in binary format
 
 
 # Structure
