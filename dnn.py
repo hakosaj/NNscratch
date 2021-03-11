@@ -1,3 +1,6 @@
+# Jussi Hakosalo - hakosaj - 2021
+
+
 import numpy as np
 import time
 import math
@@ -15,9 +18,9 @@ class DeepNeuralNetwork:
     def __init__(
         self,
         sizes,
-        epochs=20,
-        gamma=0.01,
-        batchSize=20,
+        epochs=25,
+        gamma=0.1,
+        batchSize=32,
         variableGamma=False,
         decreasing=False,
         optimizer="SGD",
@@ -290,7 +293,7 @@ class DeepNeuralNetwork:
                 if not self.decreasing:
                     self.gamma = self.gamma ** 0.85
                 else:
-                    self.gamma = self.gamma ** 1.2
+                    self.gamma = self.gamma ** 1.15
 
         print("Training done")
         return self.gammas, self.losses

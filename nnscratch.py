@@ -1,36 +1,74 @@
+# Jussi Hakosalo - hakosaj - 2021
+
+
+# The best library ever, all linear algebra is done with this baby
 import numpy as np
+
+# For unpacking the byte format file the dataset comes in
 import struct
+
+# Randomness breh
 import random
+
+# Cool graphs are cool
 import matplotlib.pyplot as plt
+
+# The actual network class
 from dnn import DeepNeuralNetwork
+
+# Time stuff
 import time
+
+# Panic exit if necessary
 import sys
 
-# import torchvision
+
+def unpackImages(imagefile="images", labelfile="labels"):
+
+    """
+    Helper function to extract the data from the original MNIST dataset, which is given in byte format.
+
+    Parameters
+    ----------
+    imagefile : str
+        File containing the byteform images
+    labelfile : str
+        File containing the byteform labels
+
+    Returns
+    -------
+    imgs: numpy.ndarray
+        Numpy array containing the images scaled down and reshaped
+    labs: numpy.ndarray
+        Numpy array containing the labels
 
 
-def net():
-    # https://mlfromscratch.com/neural-network-tutorial/#/
-    trainsize = 0.8
-    testsize = 1 - trainsize
+    """
 
-    plotting = True
-
-    with open("images", "rb") as f:
+    # Struct unpack magic happening here
+    with open(imagefile, "rb") as f:
         magic, size = struct.unpack(">II", f.read(8))
         nrows, ncols = struct.unpack(">II", f.read(8))
         imgs = np.fromfile(f, dtype=np.dtype(np.uint8)).newbyteorder(">")
-        # imgs = imgs.reshape((size,nrows,ncols))
-        # Flattened
+
+        # Flatten the images from 28x28 to a 784-vector
         imgs = imgs.reshape((size, nrows * ncols))
 
+    # Normalize the pixels
     imgs = (imgs / 255).astype("float32")
 
-    with open("labels", "rb") as i:
+    with open(labelfile, "rb") as i:
         magic, size = struct.unpack(">II", i.read(8))
         labs = np.fromfile(i, dtype=np.dtype(np.uint8)).newbyteorder(">")
 
-    # Reduced size for testing
+    return imgs, labs
+
+
+def net():
+    trainsize = 0.8
+    plotting = True
+    imgs, labs = unpackImages()
+
     try:
         sz = int(round(float(sys.argv[1]) * len(labs)))
         if sz > 60000:
@@ -40,10 +78,7 @@ def net():
         labs = labs[60000 - sz :]
     except IndexError:
         sz = 0
-
         pass
-
-    # print(imgs.shape)
 
     # To categorial: one-hot matrix:
     cats = np.zeros((size, 10))
@@ -51,7 +86,6 @@ def net():
         vl = labs[i]
         cats[i][vl] = 1
 
-    # print("categorials done")
     print(f"Using {len(labs) if sz==0 else size} samples")
 
     ##At this stage, imgs is 60000*784 pixel images between 0 and 1
@@ -74,28 +108,16 @@ def net():
     input_layer = 9
     a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 
-    # Dtrain_set=torchvision.datasets.FashionMNIST(root='.',download=True,train=True)
-    # Dtest_set=torchvision.datasets.FashionMNIST(root='.',download=True,train=False)
-    # Dtrainimages2=np.array(Dtrain_set.data)
-    # trainlabels2=np.array(Dtrain_set.targets)
-    # trainimages2 = Dtrainimages2.reshape((size, nrows * ncols))
-    # Dtestimages2=np.array(Dtest_set.data)
-    # testimages2=Dtestimages2.reshape((10000,nrows*ncols))
-    # testlabels2=np.array(Dtest_set.targets)
-    # testimages2 = (testimages2 / 255).astype("float32")
-
-    # network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=True)
     varGamma = True
     decreasing = True
-    epochs = 17
+    epochs = 20
     network = DeepNeuralNetwork(
-        sizes=[784, 128, 96, 64, 32, 10],
+        sizes=[784, 128, 96, 64, 40, 32, 10],
         variableGamma=varGamma,
         decreasing=decreasing,
         epochs=epochs,
     )
     gammas, losses = network.train(trainimages, trainlabels, testimages, testlabels)
-    # gammas, losses = network.train(trainimages2, trainlabels2, testimages2, testlabels2)
 
     # Plot the losses and learning rates, only if adaptive learning is used!
     if plotting:
