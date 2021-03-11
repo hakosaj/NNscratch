@@ -21,6 +21,7 @@ class DeepNeuralNetwork:
         variableGamma=False,
         decreasing=False,
         optimizer="SGD",
+        activation="LeakyRELU"
     ):
         self.sizes = sizes
         self.epochs = epochs
@@ -30,6 +31,7 @@ class DeepNeuralNetwork:
         self.params = self.initializeVariableNet()
         self.optimizer = optimizer
         self.batchSize = batchSize
+        self.activation=activation
 
         # ADAM parameters
         if optimizer == "ADAM":
@@ -52,7 +54,8 @@ class DeepNeuralNetwork:
 
     def printNetworkInfo(self):
         print(f"\nInitialized network with layers as {self.sizes}")
-        print(f"Using {self.optimizer} as optimizer")
+        print(f"Using {self.optimizer} as optimizer,")
+        print(f"{self.activation} as activation")
         if self.variableGamma:
             print(f"Using an adaptive learning rate, starting from {self.gamma}")
         else:
@@ -281,12 +284,14 @@ class DeepNeuralNetwork:
 
             acc, loss = self.computeAccuracy(x_val, y_val)
             print(
-                "Epoch: {0}, Time Spent: {1:.2f}s, Accuracy: {2},".format(
-                    iteration + 1, time.time() - start_time, acc
+                "Epoch: {0}, Time Spent: {1:.2f}s, Learning rate: {2:.4f},".format(
+                    iteration + 1, time.time() - start_time, self.gamma
                 ),
-                end=" ",
             )
-            print(f"loss: {loss}\n\n")
+            print(
+                "Accuracy: {0:.5f}, Loss: {1:.5f}\n\n".format(acc,loss)
+            )
+            #print(f"loss: {loss}\n\n")
 
             if self.variableGamma:
                 if not self.decreasing:
