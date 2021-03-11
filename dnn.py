@@ -21,7 +21,7 @@ class DeepNeuralNetwork:
         variableGamma=False,
         decreasing=False,
         optimizer="SGD",
-        activation="LeakyRELU"
+        activation="LeakyRELU",
     ):
         self.sizes = sizes
         self.epochs = epochs
@@ -31,7 +31,7 @@ class DeepNeuralNetwork:
         self.params = self.initializeVariableNet()
         self.optimizer = optimizer
         self.batchSize = batchSize
-        self.activation=activation
+        self.activation = activation
 
         # ADAM parameters
         if optimizer == "ADAM":
@@ -50,8 +50,6 @@ class DeepNeuralNetwork:
         self.gammas = []
         self.printNetworkInfo()
 
-
-
     def printNetworkInfo(self):
         print(f"\nInitialized network with layers as {self.sizes}")
         print(f"Using {self.optimizer} as optimizer,")
@@ -61,11 +59,6 @@ class DeepNeuralNetwork:
         else:
             print(f"Using a static learning rate of {self.gamma}")
         print(f"Starting network training with {self.epochs} epochs\n")
-
-
-        
-
-
 
     def initializeVariableNet(self):
         # Input layer and output layer always exist
@@ -253,10 +246,10 @@ class DeepNeuralNetwork:
                 bs = {}
                 passflag = False
 
-            #for x, y in tqdm(zip(x_train, y_train)):
-            trainiters=zip(x_train, y_train)
+            # for x, y in tqdm(zip(x_train, y_train)):
+            trainiters = zip(x_train, y_train)
             with tqdm(total=len(x_train)) as pbar:
-                for x,y in trainiters:
+                for x, y in trainiters:
                     i += 1
 
                     a, b = self.variableBackprop(y, self.variableForwardPass(x))
@@ -288,10 +281,8 @@ class DeepNeuralNetwork:
                     iteration + 1, time.time() - start_time, self.gamma
                 ),
             )
-            print(
-                "Accuracy: {0:.5f}, Loss: {1:.5f}\n\n".format(acc,loss)
-            )
-            #print(f"loss: {loss}\n\n")
+            print("Accuracy: {0:.5f}, Loss: {1:.5f}\n\n".format(acc, loss))
+            # print(f"loss: {loss}\n\n")
 
             if self.variableGamma:
                 if not self.decreasing:

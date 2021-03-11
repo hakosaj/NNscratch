@@ -87,9 +87,12 @@ def net():
     # network = DeepNeuralNetwork(sizes=[784, 128, 64, 10],variableGamma=True)
     varGamma = True
     decreasing = True
-    epochs=15
+    epochs = 15
     network = DeepNeuralNetwork(
-        sizes=[784, 128, 96, 64, 32, 10], variableGamma=varGamma, decreasing=decreasing, epochs= epochs
+        sizes=[784, 128, 96, 64, 32, 10],
+        variableGamma=varGamma,
+        decreasing=decreasing,
+        epochs=epochs,
     )
     gammas, losses = network.train(trainimages, trainlabels, testimages, testlabels)
     # gammas, losses = network.train(trainimages2, trainlabels2, testimages2, testlabels2)
