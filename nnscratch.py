@@ -115,7 +115,7 @@ def net():
     varGamma = True
     decreasing = True
     epochs = 20
-    gamma = 0.01
+    gamma = 0.001
     batchSize = 32
     optimizer = "SGD"
     activation = "leakyRELU"

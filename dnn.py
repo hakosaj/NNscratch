@@ -7,7 +7,8 @@ import math
 import collections
 from tqdm import tqdm
 
-
+#https://mlfromscratch.com/neural-network-tutorial/
+#https://github.com/addyg/Neural-Network-from-Scratch/blob/master/02%20SRC/NeuralNetwork.py
 class DeepNeuralNetwork:
 
     # Input layer: flattened 28x28=784
@@ -37,12 +38,15 @@ class DeepNeuralNetwork:
         self.activation = activation
 
         # ADAM parameters
-        if optimizer == "ADAM":
+        if optimizer == "SGD":
+            #ADAM STUFF
             self.beta1 = 0.9
             self.beta2 = 0.99
             self.epsilon = 0.00000001
             self.m_dw, self.v_dw = 0, 0
             self.m_db, self.v_db = 0, 0
+            self.ms = [np.zeros_like(param) for param in list(self.params.values())]
+            self.vs = [np.zeros_like(param) for param in list(self.params.values())]
 
         if variableGamma:
             if decreasing:
@@ -201,7 +205,7 @@ class DeepNeuralNetwork:
                     a, b = self.variableBackprop(y, self.variableForwardPass(x))
 
                     if self.optimizer == "SGD":
-                        self.updateNetworkParameters(a, b)
+                        self.updateNetworkParameters(a, b,i)
                     if self.optimizer == "MBGD":
                         if not passflag:
                             ws = a
@@ -216,7 +220,7 @@ class DeepNeuralNetwork:
                         if g == batchSize:
                             ws = {k: v / batchSize for k, v in ws.items()}
                             bs = {k: v / batchSize for k, v in bs.items()}
-                            self.updateNetworkParameters(ws, bs)
+                            self.updateNetworkParameters(ws, bs,i)
                             passflag = False
                             g = 0
                     pbar.update()
@@ -233,10 +237,36 @@ class DeepNeuralNetwork:
         print("Training done")
         return self.gammas, self.losses
 
-    def updateNetworkParameters(self, changes_to_w, changes_to_b):
+    def updateNetworkParameters(self, changes_to_w, changes_to_b,i):
+
         for key, value in changes_to_w.items():
+            grads=self.gamma*value
+
+
+            """Eli jotain tällästä sen pitäis olla.
+            Kuitenki noi array shapet ja muut on päin vittua, enkä millään
+            keksi et miten tä pitäis oikee tehä ":D"""
+            self.ms = [self.beta1 * m + (1 - self.beta1) * grad
+            for m, grad in zip(self.ms, grads)]
+            self.vs = [self.beta2 * v + (1 - self.beta2) * (grad ** 2)
+            for v, grad in zip(self.vs, grads)]
+            updates = [-self.gamma * m / (np.sqrt(v) + self.epsilon)
+            for m, v in zip(self.ms, self.vs)]
+            #self.m_dw=self.beta1*self.m_dw+(1-self.beta1)*grad
+            #self.v_dw = self.beta2*self.v_dw + (1-self.beta2)*(grad**2)
+            #m_dw_corr = self.m_dw/(1-self.beta1**i)
+            #v_dw_corr = self.v_dw/(1-self.beta2**i)
+            #value = value - self.gamma*(m_dw_corr/(np.sqrt(v_dw_corr)+self.epsilon))
             self.params[key] -= self.gamma * value
+            self.params[key] += updates
+
         for key, value in changes_to_b.items():
+            #grad=self.gamma*value
+            #self.m_db = self.beta1*self.m_db + (1-self.beta1)*grad
+            #self.v_db = self.beta2*self.v_db + (1-self.beta2)*(grad)
+            #m_db_corr = self.m_db/(1-self.beta1**i)
+            #v_db_corr = self.v_db/(1-self.beta2**i)
+            #value = value - self.gamma*(m_db_corr/(np.sqrt(v_db_corr)+self.epsilon))
             self.params[key] -= self.gamma * value
 
     def computeAccuracy(self, x_val, y_val):
