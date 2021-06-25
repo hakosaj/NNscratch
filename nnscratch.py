@@ -111,7 +111,7 @@ def net():
     a1 = np.random.randn(hidden_1, input_layer) * np.sqrt(1.0 / hidden_1)
 
     # Define NN parameters here
-    sizes = [784, 256, 128, 96, 64, 32, 10]
+    sizes = [784,  256, 128, 96, 64, 32, 10]
     varGamma = True
     decreasing = True
     epochs = 20

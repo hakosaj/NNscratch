@@ -35,6 +35,7 @@ class DeepNeuralNetwork:
         self.params = self.initializeVariableNet()
         self.optimizer = optimizer
         self.batchSize = batchSize
+        self.dropreduce=False
         self.activation = activation
 
         # ADAM parameters
@@ -234,6 +235,12 @@ class DeepNeuralNetwork:
                 else:
                     self.gamma = self.gamma ** 1.15
 
+
+            if iteration <4 and acc>0.88 and not self.dropreduce:
+                self.gamma=self.gamma/1.5
+                self.dropreduce=True
+                print("Drop reduced the learning rate\n")
+
         print("Training done")
         return self.gammas, self.losses
 
@@ -246,19 +253,19 @@ class DeepNeuralNetwork:
             """Eli jotain tällästä sen pitäis olla.
             Kuitenki noi array shapet ja muut on päin vittua, enkä millään
             keksi et miten tä pitäis oikee tehä ":D"""
-            self.ms = [self.beta1 * m + (1 - self.beta1) * grad
-            for m, grad in zip(self.ms, grads)]
-            self.vs = [self.beta2 * v + (1 - self.beta2) * (grad ** 2)
-            for v, grad in zip(self.vs, grads)]
-            updates = [-self.gamma * m / (np.sqrt(v) + self.epsilon)
-            for m, v in zip(self.ms, self.vs)]
+            #self.ms = [self.beta1 * m + (1 - self.beta1) * grad
+            #for m, grad in zip(self.ms, grads)]
+            #self.vs = [self.beta2 * v + (1 - self.beta2) * (grad ** 2)
+            #for v, grad in zip(self.vs, grads)]
+            #updates = [-self.gamma * m / (np.sqrt(v) + self.epsilon)
+            #for m, v in zip(self.ms, self.vs)]
             #self.m_dw=self.beta1*self.m_dw+(1-self.beta1)*grad
             #self.v_dw = self.beta2*self.v_dw + (1-self.beta2)*(grad**2)
             #m_dw_corr = self.m_dw/(1-self.beta1**i)
             #v_dw_corr = self.v_dw/(1-self.beta2**i)
             #value = value - self.gamma*(m_dw_corr/(np.sqrt(v_dw_corr)+self.epsilon))
             self.params[key] -= self.gamma * value
-            self.params[key] += updates
+            #self.params[key] += updates
 
         for key, value in changes_to_b.items():
             #grad=self.gamma*value
