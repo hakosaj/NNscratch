@@ -32,23 +32,21 @@ class DeepNeuralNetwork:
         self.gamma = gamma
         self.variableGamma = variableGamma
         self.decreasing = decreasing
-        self.params = self.initializeVariableNet()
         self.optimizer = optimizer
         self.batchSize = batchSize
         self.dropreduce=False
         self.activation = activation
 
+        self.moments={}
+        self.vmoments={}
         # ADAM parameters
         if optimizer == "SGD":
             #ADAM STUFF
             self.beta1 = 0.9
             self.beta2 = 0.99
             self.epsilon = 0.00000001
-            self.m_dw, self.v_dw = 0, 0
-            self.m_db, self.v_db = 0, 0
-            self.ms = [np.zeros_like(param) for param in list(self.params.values())]
-            self.vs = [np.zeros_like(param) for param in list(self.params.values())]
 
+        self.params = self.initializeVariableNet()
         if variableGamma:
             if decreasing:
                 self.gamma = 0.5
@@ -83,6 +81,15 @@ class DeepNeuralNetwork:
                 1.0 / layers[i + 1]
             )
         params[f"BO"] = np.random.randn(layers[-1]) * np.sqrt(1.0 / layers[-1])
+
+
+        #ADAM
+    
+        for i in range(0, len(layers) - 1):
+            self.moments[f"W{i+1}"] = np.zeros((layers[i + 1], layers[i]))
+
+        for i in range(0, len(layers) - 1):
+            self.vmoments[f"W{i+1}"] = np.zeros((layers[i + 1], layers[i]))
 
         return params
 
@@ -245,35 +252,44 @@ class DeepNeuralNetwork:
         return self.gammas, self.losses
 
     def updateNetworkParameters(self, changes_to_w, changes_to_b,i):
-
         for key, value in changes_to_w.items():
-            grads=self.gamma*value
 
 
-            """Eli jotain tällästä sen pitäis olla.
-            Kuitenki noi array shapet ja muut on päin vittua, enkä millään
-            keksi et miten tä pitäis oikee tehä ":D"""
-            #self.ms = [self.beta1 * m + (1 - self.beta1) * grad
-            #for m, grad in zip(self.ms, grads)]
-            #self.vs = [self.beta2 * v + (1 - self.beta2) * (grad ** 2)
-            #for v, grad in zip(self.vs, grads)]
-            #updates = [-self.gamma * m / (np.sqrt(v) + self.epsilon)
-            #for m, v in zip(self.ms, self.vs)]
-            #self.m_dw=self.beta1*self.m_dw+(1-self.beta1)*grad
-            #self.v_dw = self.beta2*self.v_dw + (1-self.beta2)*(grad**2)
-            #m_dw_corr = self.m_dw/(1-self.beta1**i)
-            #v_dw_corr = self.v_dw/(1-self.beta2**i)
-            #value = value - self.gamma*(m_dw_corr/(np.sqrt(v_dw_corr)+self.epsilon))
+            #g(t)=f'(x(t-1))=derivative
+            derivative=value
+
+            #first moment
+            #m(t)=beta1*m(t-1)+(1-beta1)*g(t)
+            self.moments[key]=self.moments[key]*self.beta1+(1-self.beta1)*derivative
+
+            #Bias correct first moment
+            self.moments[key]=self.moments[key]/(1-self.beta1)
+
+            #Decay
+            self.beta1**(i+1)
+            
+            
+
+
+            #second moment
+            #v(t)=beta2*v(t-1)+(1-beta2)*g(t)^2
+            self.vmoments[key]=self.beta2*self.vmoments[key]+(1-self.beta2)*(derivative**2)
+            
+            #Bias correct the first moment
+            self.vmoments[key]=self.vmoments[key]/(1-self.beta2)
+
+            #Decay
+            self.beta2**(i+1)
+
+
+            #ADAM
+            self.params[key]-=self.gamma*self.moments[key]/(self.vmoments[key]**(0.5)+self.epsilon)
+
+            #Classic gradient desc
             self.params[key] -= self.gamma * value
-            #self.params[key] += updates
+
 
         for key, value in changes_to_b.items():
-            #grad=self.gamma*value
-            #self.m_db = self.beta1*self.m_db + (1-self.beta1)*grad
-            #self.v_db = self.beta2*self.v_db + (1-self.beta2)*(grad)
-            #m_db_corr = self.m_db/(1-self.beta1**i)
-            #v_db_corr = self.v_db/(1-self.beta2**i)
-            #value = value - self.gamma*(m_db_corr/(np.sqrt(v_db_corr)+self.epsilon))
             self.params[key] -= self.gamma * value
 
     def computeAccuracy(self, x_val, y_val):
