@@ -18,6 +18,15 @@ Best accuracy so far is **0.91967** with parameters:
    - used 0.4 of the whole dataset
 
 
+
+
+# Todo
+
+- ADAM: some ideas are there, but it's not really working yet.
+- Config file: duh
+- Comments: clear for others to understand
+
+
 # File contents
 
 - `nnscratch.py` contains all the helper functions and setup functions for the net 
